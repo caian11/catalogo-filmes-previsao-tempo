@@ -1,0 +1,85 @@
+@model ImportMovieViewModel
+
+@{
+    ViewData["Title"] = "Importar filme";
+}
+
+<h1>Importar filme</h1>
+
+<form asp-action="Import" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="TmdbId" />
+    <input type="hidden" asp-for="PosterPath" />
+
+    <div>
+        <label asp-for="Titulo"></label>
+        <input asp-for="Titulo" />
+        <span asp-validation-for="Titulo"></span>
+    </div>
+
+    <div>
+        <label asp-for="TituloOriginal"></label>
+        <input asp-for="TituloOriginal" />
+    </div>
+
+    <div>
+        <label asp-for="Sinopse"></label>
+        <textarea asp-for="Sinopse"></textarea>
+    </div>
+
+    <div>
+        <label asp-for="DataLancamento"></label>
+        <input asp-for="DataLancamento" type="date" />
+    </div>
+
+    <div>
+        <label asp-for="Genero"></label>
+        <input asp-for="Genero" />
+    </div>
+
+    <div>
+        <label asp-for="Lingua"></label>
+        <input asp-for="Lingua" />
+    </div>
+
+    <div>
+        <label asp-for="Duracao"></label>
+        <input asp-for="Duracao" type="number" />
+    </div>
+
+    <div>
+        <label asp-for="NotaMedia"></label>
+        <input asp-for="NotaMedia" />
+    </div>
+
+    <div>
+        <label asp-for="ElencoPrincipal"></label>
+        <textarea asp-for="ElencoPrincipal"></textarea>
+    </div>
+
+    <hr />
+
+    <h3>Localização (preencher se o TMDb não fornecer)</h3>
+
+    <div>
+        <label asp-for="CidadeReferencia"></label>
+        <input asp-for="CidadeReferencia" />
+    </div>
+
+    <div>
+        <label asp-for="Latitude"></label>
+        <input asp-for="Latitude" type="number" step="0.000001" />
+    </div>
+
+    <div>
+        <label asp-for="Longitude"></label>
+        <input asp-for="Longitude" type="number" step="0.000001" />
+    </div>
+
+    <button type="submit">Salvar filme</button>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

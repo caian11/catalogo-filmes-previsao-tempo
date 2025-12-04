@@ -1,0 +1,23 @@
+@model MovieDetailsViewModel
+
+@{
+    ViewData["Title"] = "Detalhes TMDb";
+}
+
+<h1>@Model.Titulo</h1>
+
+@if (!string.IsNullOrEmpty(Model.PosterUrl))
+{
+    <img src="@Model.PosterUrl" alt="@Model.Titulo" style="height:300px;" />
+}
+
+<p><strong>Título original:</strong> @Model.TituloOriginal</p>
+<p><strong>Sinopse:</strong> @Model.Sinopse</p>
+<p><strong>Lançamento:</strong> @(Model.DataLancamento?.ToString("dd/MM/yyyy"))</p>
+<p><strong>Gênero:</strong> @Model.Genero</p>
+<p><strong>Língua:</strong> @Model.Lingua</p>
+<p><strong>Duração:</strong> @Model.Duracao min</p>
+<p><strong>Nota média:</strong> @Model.NotaMedia</p>
+<p><strong>Elenco principal:</strong> @Model.ElencoPrincipal</p>
+
+<a asp-action="Import" asp-route-tmdbId="@Model.TmdbId">Importar este filme</a>

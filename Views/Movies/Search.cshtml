@@ -1,0 +1,49 @@
+@model MovieSearchViewModel
+
+@{
+    ViewData["Title"] = "Buscar filmes";
+}
+
+<h1>Buscar filmes no TMDb</h1>
+
+<form method="get" asp-action="Search">
+    <input type="text" name="query" value="@Model.Query" placeholder="Nome do filme" />
+    <button type="submit">Buscar</button>
+</form>
+
+@if (Model.Results != null && Model.Results.Any())
+{
+    <p>Página @Model.Page de @Model.TotalPages</p>
+
+    <ul>
+        @foreach (var item in Model.Results)
+        {
+            <li>
+                <div>
+                    @if (!string.IsNullOrEmpty(item.PosterUrl))
+                    {
+                        <img src="@item.PosterUrl" alt="@item.Titulo" style="height:150px;" />
+                    }
+                    <h3>@item.Titulo</h3>
+                    <p>@item.Sinopse</p>
+                    <p>Lançamento: @(item.DataLancamento?.ToString("dd/MM/yyyy"))</p>
+
+                    <a asp-action="Details" asp-route-tmdbId="@item.TmdbId">Detalhes (TMDb)</a> |
+                    <a asp-action="Import" asp-route-tmdbId="@item.TmdbId">Importar</a>
+                </div>
+            </li>
+        }
+    </ul>
+
+    <div>
+        @if (Model.Page > 1)
+        {
+            <a asp-action="Search" asp-route-query="@Model.Query" asp-route-page="@(Model.Page - 1)">Anterior</a>
+        }
+
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a asp-action="Search" asp-route-query="@Model.Query" asp-route-page="@(Model.Page + 1)">Próxima</a>
+        }
+    </div>
+}
