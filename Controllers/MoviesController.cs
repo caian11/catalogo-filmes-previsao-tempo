@@ -1,0 +1,172 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using catalogo_filmes_previsao_tempo.Data;
+using catalogo_filmes_previsao_tempo.Models;
+using catalogo_filmes_previsao_tempo.Services;
+using TMDbLib.Objects.Movies;
+
+public class MoviesController : Controller
+{
+    private readonly ITmdbApiService _tmdb;
+    private readonly AppDbContext _db;
+
+    public MoviesController(ITmdbApiService tmdb, AppDbContext db)
+    {
+        _tmdb = tmdb;
+        _db = db;
+    }
+
+    // GET /Movies/Search?query=...&page=1
+    public async Task<IActionResult> Search(string? query, int page = 1)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return View(new MovieSearchViewModel { Query = "", Page = 1, TotalPages = 0 });
+
+        var searchResult = await _tmdb.SearchMoviesAsync(query, page);
+        var config = await _tmdb.GetConfigurationAsync();
+
+        var baseUrl = config.Images.SecureBaseUrl ?? config.Images.BaseUrl;
+        var size = config.Images.PosterSizes.Contains("w342")
+            ? "w342"
+            : config.Images.PosterSizes.Last();
+
+        var vm = new MovieSearchViewModel
+        {
+            Query = query,
+            Page = searchResult.Page,
+            TotalPages = searchResult.TotalPages,
+            Results = searchResult.Results.Select(r => new MovieListItemViewModel
+            {
+                TmdbId = r.Id,
+                Titulo = r.Title,
+                Sinopse = r.Overview,
+                DataLancamento = r.ReleaseDate,
+                PosterUrl = string.IsNullOrEmpty(r.PosterPath)
+                    ? null
+                    : $"{baseUrl}{size}{r.PosterPath}"
+            }).ToList()
+        };
+
+        return View(vm);
+    }
+
+    // GET /Movies/Details?tmdbId=123 (detalhe direto do TMDb) – RF04
+    public async Task<IActionResult> Details(int tmdbId)
+    {
+        var movie = await _tmdb.GetMovieDetailsAsync(tmdbId);
+        var config = await _tmdb.GetConfigurationAsync();
+
+        var baseUrl = config.Images.SecureBaseUrl ?? config.Images.BaseUrl;
+        var size = config.Images.PosterSizes.Contains("w342")
+            ? "w342"
+            : config.Images.PosterSizes.Last();
+
+        var elenco = movie.Credits?.Cast?
+            .OrderBy(c => c.Order)
+            .Take(5)
+            .Select(c => c.Name);
+
+        var vm = new MovieDetailsViewModel
+        {
+            TmdbId = movie.Id,
+            Titulo = movie.Title,
+            TituloOriginal = movie.OriginalTitle,
+            Sinopse = movie.Overview,
+            DataLancamento = movie.ReleaseDate,
+            Genero = movie.Genres != null ? string.Join(", ", movie.Genres.Select(g => g.Name)) : null,
+            PosterUrl = string.IsNullOrEmpty(movie.PosterPath)
+                ? null
+                : $"{baseUrl}{size}{movie.PosterPath}",
+            Lingua = movie.OriginalLanguage,
+            Duracao = movie.Runtime,
+            NotaMedia = movie.VoteAverage,
+            ElencoPrincipal = elenco != null ? string.Join(", ", elenco) : null
+        };
+
+        return View(vm);
+    }
+
+    // GET /Movies/Import?tmdbId=123  -> tela para o usuário ajustar cidade/lat/long
+    [HttpGet]
+    public async Task<IActionResult> Import(int tmdbId)
+    {
+        var movie = await _tmdb.GetMovieDetailsAsync(tmdbId);
+
+        var elenco = movie.Credits?.Cast?
+            .OrderBy(c => c.Order)
+            .Take(5)
+            .Select(c => c.Name);
+
+        var vm = new ImportMovieViewModel
+        {
+            TmdbId = movie.Id,
+            Titulo = movie.Title,
+            TituloOriginal = movie.OriginalTitle,
+            Sinopse = movie.Overview,
+            DataLancamento = movie.ReleaseDate,
+            Genero = movie.Genres != null ? string.Join(", ", movie.Genres.Select(g => g.Name)) : null,
+            PosterPath = movie.PosterPath,
+            Lingua = movie.OriginalLanguage,
+            Duracao = movie.Runtime,
+            NotaMedia = movie.VoteAverage,
+            ElencoPrincipal = elenco != null ? string.Join(", ", elenco) : null
+            // CidadeReferencia, Latitude, Longitude ficam em branco pro usuário preencher
+        };
+
+        return View(vm);
+    }
+
+    // POST /Movies/Import  -> persiste na tabela filmes (RF01 + RF03)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Import(ImportMovieViewModel vm)
+    {
+        if (!ModelState.IsValid)
+            return View(vm);
+
+        // evita duplicidade por TmdbId
+        if (await _db.Filmes.AnyAsync(f => f.TmdbId == vm.TmdbId))
+        {
+            var existente = await _db.Filmes.FirstAsync(f => f.TmdbId == vm.TmdbId);
+            return RedirectToAction(nameof(DetailsLocal), new { id = existente.Id });
+        }
+
+        var filme = new Filme
+        {
+            TmdbId = vm.TmdbId,
+            Titulo = vm.Titulo,
+            TituloOriginal = vm.TituloOriginal,
+            Sinopse = vm.Sinopse,
+            DataLancamento = vm.DataLancamento,
+            Genero = vm.Genero,
+            PosterPath = vm.PosterPath,
+            Lingua = vm.Lingua,
+            Duracao = vm.Duracao,
+            NotaMedia = vm.NotaMedia.HasValue ? (decimal?)vm.NotaMedia.Value : null,
+            ElencoPrincipal = vm.ElencoPrincipal,
+            CidadeReferencia = vm.CidadeReferencia,
+            Latitude = vm.Latitude,
+            Longitude = vm.Longitude,
+            DataCriacao = DateTimeOffset.UtcNow,
+            DataAtualizacao = DateTimeOffset.UtcNow
+        };
+
+
+        _db.Filmes.Add(filme);
+        await _db.SaveChangesAsync();
+
+        return RedirectToAction(nameof(DetailsLocal), new { id = filme.Id });
+    }
+
+    // detalhe do filme salvo localmente (não estava no requisito, mas é útil)
+    public async Task<IActionResult> DetailsLocal(int id)
+    {
+        var filme = await _db.Filmes.FindAsync(id);
+        if (filme == null) return NotFound();
+
+        return View(filme);
+    }
+}

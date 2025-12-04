@@ -7,4 +7,9 @@
         <RootNamespace>catalogo_filmes_previsao_tempo</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="TMDbLib" Version="2.3.0" />
+    </ItemGroup>
+
 </Project>
