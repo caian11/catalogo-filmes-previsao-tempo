@@ -4,20 +4,102 @@
     ViewData["Title"] = "Detalhes TMDb";
 }
 
-<h1>@Model.Titulo</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-1">@Model.Titulo</h1>
+        <p class="text-muted small mb-0">Detalhes do filme obtidos via TMDb.</p>
+    </div>
 
-@if (!string.IsNullOrEmpty(Model.PosterUrl))
-{
-    <img src="@Model.PosterUrl" alt="@Model.Titulo" style="height:300px;" />
-}
+    <a asp-action="Search"
+       asp-route-query=""
+       class="btn btn-outline-secondary btn-sm">
+        Voltar à busca
+    </a>
+</div>
 
-<p><strong>Título original:</strong> @Model.TituloOriginal</p>
-<p><strong>Sinopse:</strong> @Model.Sinopse</p>
-<p><strong>Lançamento:</strong> @(Model.DataLancamento?.ToString("dd/MM/yyyy"))</p>
-<p><strong>Gênero:</strong> @Model.Genero</p>
-<p><strong>Língua:</strong> @Model.Lingua</p>
-<p><strong>Duração:</strong> @Model.Duracao min</p>
-<p><strong>Nota média:</strong> @Model.NotaMedia</p>
-<p><strong>Elenco principal:</strong> @Model.ElencoPrincipal</p>
+<div class="row g-4">
+    <div class="col-12 col-md-4">
+        @if (!string.IsNullOrEmpty(Model.PosterUrl))
+        {
+                <img src="@Model.PosterUrl"
+                     alt="@Model.Titulo"
+                     class="img-fluid w-100 h-100"
+                     style="object-fit: cover;" />
+          
+        }
+        else
+        {
+            <div class="d-flex align-items-center justify-content-center border rounded-3 bg-light text-muted small"
+                 style="height: 100%;">
+                Sem poster disponível
+            </div>
+        }
+    </div>
 
-<a asp-action="Import" asp-route-tmdbId="@Model.TmdbId">Importar este filme</a>
+    <div class="col-12 col-md-8">
+        <div class="mb-3">
+            @if (!string.IsNullOrEmpty(Model.Genero))
+            {
+                <span class="badge bg-secondary me-2">@Model.Genero</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.Lingua))
+            {
+                <span class="badge bg-light text-muted border">
+                    @Model.Lingua
+                </span>
+            }
+        </div>
+
+        <dl class="row mb-3">
+            <dt class="col-sm-4 text-muted small">Título original</dt>
+            <dd class="col-sm-8 small">@Model.TituloOriginal</dd>
+
+            <dt class="col-sm-4 text-muted small">Lançamento</dt>
+            <dd class="col-sm-8 small">
+                @(Model.DataLancamento?.ToString("dd/MM/yyyy") ?? "Sem data")
+            </dd>
+
+            <dt class="col-sm-4 text-muted small">Duração</dt>
+            <dd class="col-sm-8 small">
+                @(Model.Duracao > 0 ? $"{Model.Duracao} min" : "Não informado")
+            </dd>
+
+            <dt class="col-sm-4 text-muted small">Nota média</dt>
+            <dd class="col-sm-8 small">
+                @(Model.NotaMedia.HasValue && Model.NotaMedia.Value > 0
+                    ? Model.NotaMedia.Value.ToString("0.0")
+                    : "Sem avaliação")
+            </dd>
+
+
+            <dt class="col-sm-4 text-muted small">Elenco principal</dt>
+            <dd class="col-sm-8 small">
+                @(!string.IsNullOrWhiteSpace(Model.ElencoPrincipal)
+                    ? Model.ElencoPrincipal
+                    : "Não informado")
+            </dd>
+        </dl>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Sinopse))
+        {
+            <div class="mb-4">
+                <h2 class="h6 mb-2">Sinopse</h2>
+                <p class="small text-muted mb-0">@Model.Sinopse</p>
+            </div>
+        }
+
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary"
+               asp-action="Import"
+               asp-route-tmdbId="@Model.TmdbId">
+                Importar este filme
+            </a>
+
+            <a class="btn btn-outline-secondary"
+               href="https://www.themoviedb.org/movie/@Model.TmdbId"
+               target="_blank" rel="noopener noreferrer">
+                Ver no TMDb
+            </a>
+        </div>
+    </div>
+</div>
