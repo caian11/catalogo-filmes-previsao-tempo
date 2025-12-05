@@ -4,19 +4,110 @@
     ViewData["Title"] = "Filme local";
 }
 
-<h1>@Model.Titulo</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-1">@Model.Titulo</h1>
+        <p class="text-muted small mb-0">Filme cadastrado na base local.</p>
+    </div>
 
-<p><strong>TMDbId:</strong> @Model.TmdbId</p>
-<p><strong>Título original:</strong> @Model.TituloOriginal</p>
-<p><strong>Sinopse:</strong> @Model.Sinopse</p>
-<p><strong>Lançamento:</strong> @(Model.DataLancamento?.ToString("dd/MM/yyyy"))</p>
-<p><strong>Gênero:</strong> @Model.Genero</p>
-<p><strong>Língua:</strong> @Model.Lingua</p>
-<p><strong>Duração:</strong> @Model.Duracao min</p>
-<p><strong>Nota média:</strong> @Model.NotaMedia</p>
-<p><strong>Elenco principal:</strong> @Model.ElencoPrincipal</p>
-<p><strong>Cidade referência:</strong> @Model.CidadeReferencia</p>
-<p><strong>Latitude:</strong> @Model.Latitude</p>
-<p><strong>Longitude:</strong> @Model.Longitude</p>
-<p><strong>Cadastrado em:</strong> @Model.DataCriacao</p>
-<p><strong>Atualizado em:</strong> @Model.DataAtualizacao</p>
+    <a asp-action="Index"
+       class="btn btn-outline-secondary btn-sm">
+        Voltar à lista
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Detalhes do filme</h2>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted small">TMDbId</dt>
+                    <dd class="col-sm-8 small">@Model.TmdbId</dd>
+
+                    <dt class="col-sm-4 text-muted small">Título original</dt>
+                    <dd class="col-sm-8 small">@Model.TituloOriginal</dd>
+
+                    <dt class="col-sm-4 text-muted small">Sinopse</dt>
+                    <dd class="col-sm-8 small">
+                        @if (!string.IsNullOrWhiteSpace(Model.Sinopse))
+                        {
+                            @Model.Sinopse
+                        }
+                        else
+                        {
+                            @:"Não informada"
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted small">Lançamento</dt>
+                    <dd class="col-sm-8 small">
+                        @(Model.DataLancamento?.ToString("dd/MM/yyyy") ?? "Sem data")
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted small">Gênero</dt>
+                    <dd class="col-sm-8 small">@Model.Genero</dd>
+
+                    <dt class="col-sm-4 text-muted small">Língua</dt>
+                    <dd class="col-sm-8 small">@Model.Lingua</dd>
+
+                    <dt class="col-sm-4 text-muted small">Duração</dt>
+                    <dd class="col-sm-8 small">
+                        @(Model.Duracao > 0 ? $"{Model.Duracao} min" : "Não informada")
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted small">Nota média</dt>
+                    <dd class="col-sm-8 small">
+                        @(Model.NotaMedia?.ToString("0.0") ?? "-")
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted small">Elenco principal</dt>
+                    <dd class="col-sm-8 small">
+                        @if (!string.IsNullOrWhiteSpace(Model.ElencoPrincipal))
+                        {
+                            @Model.ElencoPrincipal
+                        }
+                        else
+                        {
+                            @:"Não informado"
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Localização e metadados</h2>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-5 text-muted small">Cidade referência</dt>
+                    <dd class="col-sm-7 small">
+                        @(!string.IsNullOrWhiteSpace(Model.CidadeReferencia)
+                            ? Model.CidadeReferencia
+                            : "Não informada")
+                    </dd>
+
+                    <dt class="col-sm-5 text-muted small">Latitude</dt>
+                    <dd class="col-sm-7 small">@Model.Latitude</dd>
+
+                    <dt class="col-sm-5 text-muted small">Longitude</dt>
+                    <dd class="col-sm-7 small">@Model.Longitude</dd>
+
+                    <dt class="col-sm-5 text-muted small">Cadastrado em</dt>
+                    <dd class="col-sm-7 small">
+                        @Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+
+                    <dt class="col-sm-5 text-muted small">Atualizado em</dt>
+                    <dd class="col-sm-7 small">
+                        @Model.DataAtualizacao.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,21 +1,31 @@
 using System.Diagnostics;
+using catalogo_filmes_previsao_tempo.Data;
 using Microsoft.AspNetCore.Mvc;
 using catalogo_filmes_previsao_tempo.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace catalogo_filmes_previsao_tempo.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly AppDbContext _context;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, AppDbContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        // últimos 12 filmes cadastrados
+        var filmes = await _context.Filmes
+            .OrderByDescending(f => f.DataCriacao)
+            .Take(12)
+            .ToListAsync();
+
+        return View(filmes);
     }
 
     public IActionResult Privacy()
