@@ -1,0 +1,159 @@
+@model catalogo_filmes_previsao_tempo.Models.Filme
+
+@{
+    ViewData["Title"] = "Detalhes do filme";
+    var posterUrl = !string.IsNullOrEmpty(Model.PosterPath)
+        ? "https://image.tmdb.org/t/p/w342" + Model.PosterPath
+        : null;
+}
+
+<div class="mb-3">
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-link btn-sm">
+        <i class="fas fa-arrow-left"></i> Voltar ao catálogo
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="row g-0">
+        @if (!string.IsNullOrEmpty(posterUrl))
+        {
+            <div class="col-md-4">
+                <img src="@posterUrl"
+                     alt="@Model.Titulo"
+                     class="img-fluid rounded-start"
+                     style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+        }
+
+        <div class="col-md-8">
+            <div class="card-body">
+                <h1 class="h4 card-title mb-2">@Model.Titulo</h1>
+
+                @if (!string.IsNullOrEmpty(Model.TituloOriginal))
+                {
+                    <p class="text-muted mb-1">
+                        <small>Título original: @Model.TituloOriginal</small>
+                    </p>
+                }
+
+                @if (Model.DataLancamento.HasValue)
+                {
+                    <p class="text-muted mb-1">
+                        <small>Lançamento: @Model.DataLancamento.Value.ToString("dd/MM/yyyy")</small>
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Genero))
+                {
+                    <p class="text-muted mb-1">
+                        <small>Gênero: @Model.Genero</small>
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Lingua))
+                {
+                    <p class="text-muted mb-1">
+                        <small>Língua original: @Model.Lingua</small>
+                    </p>
+                }
+
+                @if (Model.Duracao.HasValue)
+                {
+                    <p class="text-muted mb-1">
+                        <small>Duração: @Model.Duracao min</small>
+                    </p>
+                }
+
+                @if (Model.NotaMedia.HasValue)
+                {
+                    <p class="text-muted mb-1">
+                        <small>Nota média: @Model.NotaMedia</small>
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.CidadeReferencia))
+                {
+                    <p class="text-muted mb-1">
+                        <small>Cidade de referência: @Model.CidadeReferencia</small>
+                    </p>
+                }
+
+                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                {
+                    <p class="text-muted mb-1">
+                        <small>Coordenadas: @Model.Latitude, @Model.Longitude</small>
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ElencoPrincipal))
+                {
+                    <p class="mt-3">
+                        <strong>Elenco principal:</strong><br />
+                        @Model.ElencoPrincipal
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Sinopse))
+                {
+                    <p class="mt-3">
+                        <strong>Sinopse:</strong><br />
+                        @Model.Sinopse
+                    </p>
+                }
+
+                <div class="mt-3 d-flex gap-2">
+                    <a asp-controller="Filmes"
+                       asp-action="Edit"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+
+                    <form asp-controller="Filmes"
+                          asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post"
+                          class="delete-form mb-0">
+                        @Html.AntiForgeryToken()
+                        <button type="button"
+                                class="btn btn-danger btn-sm btn-delete"
+                                data-filme-nome="@Model.Titulo">
+                            <i class="fas fa-trash-alt"></i> Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.querySelector('.btn-delete');
+            if (!btn) return;
+
+            btn.addEventListener('click', function () {
+                const form = btn.closest('form');
+                const nomeFilme = btn.getAttribute('data-filme-nome') || 'o filme';
+
+                Swal.fire({
+                    title: 'Confirmar exclusão?',
+                    text: `Você está prestes a excluir "${nomeFilme}". Essa ação não poderá ser desfeita.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim, excluir',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+}

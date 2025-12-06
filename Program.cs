@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITmdbApiService, TmdbApiService>();
+builder.Services.AddScoped<IFilmeRepository, FilmeRepository>();
 
 var app = builder.Build();
 
