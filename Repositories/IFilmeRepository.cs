@@ -9,7 +9,7 @@ namespace catalogo_filmes_previsao_tempo.Data
         // CREATE
         Task<Filme> CreateAsync(Filme filme);
 
-        // READ (exemplo: ler por TMDbId – útil pro Import)
+        // READ 
         Task<Filme?> ReadAsync(int tmdbId);
 
         // UPDATE
@@ -18,10 +18,10 @@ namespace catalogo_filmes_previsao_tempo.Data
         // DELETE
         Task DeleteAsync(int id);
 
-        // LIST (todos)
+        // LIST 
         Task<List<Filme>> ListAsync();
 
-        // GET BY ID (PK local)
+        // GET BY ID 
         Task<Filme?> GetByIdAsync(int id);
     }
 }

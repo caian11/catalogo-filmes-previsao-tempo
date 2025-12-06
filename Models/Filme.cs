@@ -17,8 +17,6 @@ public class Filme
     public string? CidadeReferencia { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-
-    // troque para DateTimeOffset
     public DateTimeOffset DataCriacao { get; set; }
     public DateTimeOffset DataAtualizacao { get; set; }
 }

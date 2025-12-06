@@ -16,14 +16,13 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         }
 
         // GET /Filmes
-        // Usa exatamente a view que você mostrou (Index.cshtml)
         public async Task<IActionResult> Index()
         {
             var lista = await _filmes.ListAsync();
             return View(lista);
         }
 
-        // GET /Filmes/Details/5 (buscar apenas um por id)
+        // GET /Filmes/Details/5 
         public async Task<IActionResult> Details(int id)
         {
             var filme = await _filmes.GetByIdAsync(id);
@@ -32,12 +31,11 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             return View(filme);
         }
 
-        // POST /Filmes/BuscarPorId  (form na própria Index)
+        // POST /Filmes/BuscarPorId  
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult BuscarPorId(int id)
         {
-            // redireciona pra Details, que já faz o GetById
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -66,7 +64,7 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // POST /Filmes/Delete/5 (delete direto a partir da Index)
+        // POST /Filmes/Delete/5 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
