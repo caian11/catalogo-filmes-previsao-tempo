@@ -53,7 +53,7 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             return View(vm);
         }
 
-        // GET /Movies/Details?tmdbId=123 (detalhe direto do TMDb) – RF04
+        // GET /Movies/Details?tmdbId=123
         public async Task<IActionResult> Details(int tmdbId)
         {
             var movie = await _tmdb.GetMovieDetailsAsync(tmdbId);
@@ -89,7 +89,7 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             return View(vm);
         }
 
-        // GET /Movies/Import?tmdbId=123  -> tela para o usuário ajustar cidade/lat/long
+        // GET /Movies/Import?tmdbId=123 
         [HttpGet]
         public async Task<IActionResult> Import(int tmdbId)
         {
@@ -113,21 +113,19 @@ namespace catalogo_filmes_previsao_tempo.Controllers
                 Duracao = movie.Runtime,
                 NotaMedia = movie.VoteAverage,
                 ElencoPrincipal = elenco != null ? string.Join(", ", elenco) : null
-                // CidadeReferencia, Latitude, Longitude preenchidos pelo usuário
             };
 
             return View(vm);
         }
 
-        // POST /Movies/Import  -> persiste na tabela filmes (RF01 + RF03)
+        // POST /Movies/Import
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Import(ImportMovieViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View(vm);
-
-            // evita duplicidade por TmdbId usando o repositório (Read)
+            
             var existente = await _filmes.ReadAsync(vm.TmdbId);
             if (existente != null)
                 return RedirectToAction(nameof(DetailsLocal), new { id = existente.Id });

@@ -23,7 +23,7 @@ namespace catalogo_filmes_previsao_tempo.Data
             return filme;
         }
 
-        // READ (por TMDbId, útil para evitar duplicidade no Import)
+        // READ 
         public async Task<Filme?> ReadAsync(int tmdbId)
         {
             return await _context.Filmes
@@ -58,7 +58,7 @@ namespace catalogo_filmes_previsao_tempo.Data
                 .ToListAsync();
         }
 
-        // GET BY ID (PK)
+        // GET BY ID 
         public async Task<Filme?> GetByIdAsync(int id)
         {
             return await _context.Filmes

@@ -24,7 +24,6 @@ public class TmdbApiService : ITmdbApiService
 
     public Task<Movie> GetMovieDetailsAsync(int tmdbId)
     {
-        // carrega créditos e imagens para montar elenco e poster
         return _client.GetMovieAsync(tmdbId, MovieMethods.Credits | MovieMethods.Images);
     }
 

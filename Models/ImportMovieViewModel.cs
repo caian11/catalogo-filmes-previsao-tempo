@@ -17,8 +17,6 @@ public class ImportMovieViewModel
     public int? Duracao { get; set; }
     public double? NotaMedia { get; set; }
     public string? ElencoPrincipal { get; set; }
-
-    // preenchidos manualmente ou com algum default
     public string? CidadeReferencia { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
