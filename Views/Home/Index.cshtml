@@ -12,11 +12,26 @@
         </p>
     </div>
 
-    <a asp-controller="Movies"
-       asp-action="Search"
-       class="btn btn-primary btn-sm">
-        Buscar novos filmes no TMDb
-    </a>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Movies"
+           asp-action="Search"
+           class="btn btn-primary btn-sm">
+            Buscar novos filmes no TMDb
+        </a>
+
+        <form asp-controller="Filmes"
+              asp-action="Export"
+              method="get"
+              class="d-flex align-items-center gap-2">
+            <select name="formato" class="form-select form-select-sm">
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+            </select>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                Exportar
+            </button>
+        </form>
+    </div>
 </div>
 
 @if (Model == null || !Model.Any())

@@ -1,22 +1,24 @@
 # catalogo-filmes-previsao-tempo
 
 ## Dependências
-**Rodar:**
 
-
+```bash
 dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 9.0.4
+```
+```bash
 dotnet add package TMDbLib
-
+```
+```bash
+dotnet add package ClosedXML
+```
 
 ---
 
 ## Observações
 
 - Criar o banco de dados `catalogo_filmes` no PostgreSQL.
-- O script para criar a tabela *Filme* está em:  
-  `catalogo-filmes-previsao-tempo/Data/db.sql`.
-- Atualizar dados de conexão no arquivo  
-  `catalogo-filmes-previsao-tempo/appsettings.json`.
+- O script para criar a tabela *Filme* está em: `catalogo-filmes-previsao-tempo/Data/db.sql`.
+- Atualizar dados de conexão no arquivo`catalogo-filmes-previsao-tempo/appsettings.json`.
 
 ---
 
