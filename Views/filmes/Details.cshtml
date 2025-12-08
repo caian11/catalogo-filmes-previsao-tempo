@@ -1,11 +1,11 @@
-@model catalogo_filmes_previsao_tempo.Models.Filme
+@model catalogo_filmes_previsao_tempo.Models.MovieDetailsWithWeatherViewModel
 
 @{
     ViewData["Title"] = "Detalhes do filme";
-    var posterUrl = !string.IsNullOrEmpty(Model.PosterPath)
-        ? "https://image.tmdb.org/t/p/w342" + Model.PosterPath
+    var posterUrl = !string.IsNullOrEmpty(Model.Filme.PosterPath)
+        ? "https://image.tmdb.org/t/p/w342" + Model.Filme.PosterPath
         : null;
-}
+}   
 
 <div class="mb-3">
     <a asp-controller="Home"
@@ -21,7 +21,7 @@
         {
             <div class="col-md-4">
                 <img src="@posterUrl"
-                     alt="@Model.Titulo"
+                     alt="@Model.Filme.Titulo"
                      class="img-fluid rounded-start"
                      style="width: 100%; height: 100%; object-fit: cover;" />
             </div>
@@ -29,97 +29,122 @@
 
         <div class="col-md-8">
             <div class="card-body">
-                <h1 class="h4 card-title mb-2">@Model.Titulo</h1>
+                <h1 class="h4 card-title mb-2">@Model.Filme.Titulo</h1>
 
-                @if (!string.IsNullOrEmpty(Model.TituloOriginal))
+                @* Campos do filme *@
+                @if (!string.IsNullOrEmpty(Model.Filme.TituloOriginal))
                 {
                     <p class="text-muted mb-1">
-                        <small>Título original: @Model.TituloOriginal</small>
+                        <small>Título original: @Model.Filme.TituloOriginal</small>
                     </p>
                 }
 
-                @if (Model.DataLancamento.HasValue)
+                @if (Model.Filme.DataLancamento.HasValue)
                 {
                     <p class="text-muted mb-1">
-                        <small>Lançamento: @Model.DataLancamento.Value.ToString("dd/MM/yyyy")</small>
+                        <small>Lançamento: @Model.Filme.DataLancamento.Value.ToString("dd/MM/yyyy")</small>
                     </p>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.Genero))
+                @if (!string.IsNullOrEmpty(Model.Filme.Genero))
                 {
                     <p class="text-muted mb-1">
-                        <small>Gênero: @Model.Genero</small>
+                        <small>Gênero: @Model.Filme.Genero</small>
                     </p>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.Lingua))
+                @if (!string.IsNullOrEmpty(Model.Filme.Lingua))
                 {
                     <p class="text-muted mb-1">
-                        <small>Língua original: @Model.Lingua</small>
+                        <small>Língua original: @Model.Filme.Lingua</small>
                     </p>
                 }
 
-                @if (Model.Duracao.HasValue)
+                @if (Model.Filme.Duracao.HasValue)
                 {
                     <p class="text-muted mb-1">
-                        <small>Duração: @Model.Duracao min</small>
+                        <small>Duração: @Model.Filme.Duracao min</small>
                     </p>
                 }
 
-                @if (Model.NotaMedia.HasValue)
+                @if (Model.Filme.NotaMedia.HasValue)
                 {
                     <p class="text-muted mb-1">
-                        <small>Nota média: @Model.NotaMedia</small>
+                        <small>Nota média: @Model.Filme.NotaMedia</small>
                     </p>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.CidadeReferencia))
+                @if (!string.IsNullOrEmpty(Model.Filme.CidadeReferencia))
                 {
                     <p class="text-muted mb-1">
-                        <small>Cidade de referência: @Model.CidadeReferencia</small>
+                        <small>Cidade de referência: @Model.Filme.CidadeReferencia</small>
                     </p>
                 }
 
-                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                @if (Model.Filme.Latitude.HasValue && Model.Filme.Longitude.HasValue)
                 {
                     <p class="text-muted mb-1">
-                        <small>Coordenadas: @Model.Latitude, @Model.Longitude</small>
+                        <small>Coordenadas: @Model.Filme.Latitude, @Model.Filme.Longitude</small>
                     </p>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.ElencoPrincipal))
+                @if (!string.IsNullOrEmpty(Model.Filme.ElencoPrincipal))
                 {
                     <p class="mt-3">
                         <strong>Elenco principal:</strong><br />
-                        @Model.ElencoPrincipal
+                        @Model.Filme.ElencoPrincipal
                     </p>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.Sinopse))
+                @if (!string.IsNullOrEmpty(Model.Filme.Sinopse))
                 {
                     <p class="mt-3">
                         <strong>Sinopse:</strong><br />
-                        @Model.Sinopse
+                        @Model.Filme.Sinopse
                     </p>
                 }
 
+                <hr />
+
+                <h5>🌦️ Previsão do Tempo</h5>
+
+                @if (!string.IsNullOrEmpty(Model.WeatherError))
+                {
+                    <div class="alert alert-warning">
+                        @Model.WeatherError
+                    </div>
+                }
+                else if (Model.Weather != null)
+                {
+                    <div class="alert alert-info">
+                        <p><strong>Máxima:</strong> @Model.Weather.MaxTemperature°C</p>
+                        <p><strong>Mínima:</strong> @Model.Weather.MinTemperature°C</p>
+                        <p><strong>Data:</strong> @Model.Weather.Date</p>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Nenhuma informação de clima disponível.</p>
+                }
+
+                @* Botões *@
                 <div class="mt-3 d-flex gap-2">
                     <a asp-controller="Filmes"
                        asp-action="Edit"
-                       asp-route-id="@Model.Id"
+                       asp-route-id="@Model.Filme.Id"
                        class="btn btn-primary btn-sm">
                         <i class="fas fa-edit"></i> Editar
                     </a>
 
                     <form asp-controller="Filmes"
                           asp-action="Delete"
-                          asp-route-id="@Model.Id"
+                          asp-route-id="@Model.Filme.Id"
                           method="post"
                           class="delete-form mb-0">
                         @Html.AntiForgeryToken()
                         <button type="button"
                                 class="btn btn-danger btn-sm btn-delete"
-                                data-filme-nome="@Model.Titulo">
+                                data-filme-nome="@Model.Filme.Titulo">
                             <i class="fas fa-trash-alt"></i> Excluir
                         </button>
                     </form>

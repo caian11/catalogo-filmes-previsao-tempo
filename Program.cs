@@ -1,6 +1,7 @@
 using System.Globalization;
 using catalogo_filmes_previsao_tempo.Data;
 using catalogo_filmes_previsao_tempo.Services;
+using catalogo_filmes_previsao_tempo.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ITmdbApiService, TmdbApiService>();
 builder.Services.AddScoped<IFilmeRepository, FilmeRepository>();
 
+builder.Services.AddHttpClient<IWeatherApiService, WeatherApiService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,7 +29,7 @@ if (!app.Environment.IsDevelopment())
 }
 var defaultCulture = new CultureInfo("pt-BR");
 var supportedCultures = new[] { defaultCulture };
-
+    
 var localizationOptions = new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture("pt-BR"),

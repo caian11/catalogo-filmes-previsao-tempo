@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using catalogo_filmes_previsao_tempo.Data;
+using catalogo_filmes_previsao_tempo.Services;
 using catalogo_filmes_previsao_tempo.Models;
 using ClosedXML.Excel;
 
@@ -14,10 +15,13 @@ namespace catalogo_filmes_previsao_tempo.Controllers
     public class FilmesController : Controller
     {
         private readonly IFilmeRepository _filmes;
+        private readonly IWeatherApiService _weather;
 
-        public FilmesController(IFilmeRepository filmes)
+
+        public FilmesController(IFilmeRepository filmes, IWeatherApiService weather)
         {
             _filmes = filmes;
+            _weather = weather;
         }
 
         // GET /Filmes
@@ -109,7 +113,36 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             var filme = await _filmes.GetByIdAsync(id);
             if (filme == null) return NotFound();
 
-            return View(filme);
+            WeatherForecastDto? weather = null;
+            string? weatherError = null;
+
+            if (filme.Latitude.HasValue && filme.Longitude.HasValue)
+            {
+                try
+                {
+                    weather = await _weather.GetWeatherAsync(
+                        filme.Latitude.Value,
+                        filme.Longitude.Value
+                    );
+                }
+                catch (Exception ex)
+                {
+                    weatherError = "Não foi possível obter a previsão do tempo.";
+                }
+            }
+            else
+            {
+                weatherError = "Latitude/Longitude não informadas. Edite o filme para adicionar.";
+            }
+
+            var vm = new MovieDetailsWithWeatherViewModel
+            {
+                Filme = filme,
+                Weather = weather,
+                WeatherError = weatherError
+            };
+
+            return View(vm);
         }
 
         // POST /Filmes/BuscarPorId  
