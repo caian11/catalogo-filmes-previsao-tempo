@@ -65,5 +65,23 @@ namespace catalogo_filmes_previsao_tempo.Data
                 .AsNoTracking()
                 .FirstOrDefaultAsync(f => f.Id == id);
         }
+        
+        public async Task<int> CountAsync()
+        {
+            return await _context.Filmes.CountAsync();
+        }
+
+        public async Task<List<Filme>> ListPagedAsync(int pagina, int tamanhoPagina)
+        {
+            if (pagina < 1) pagina = 1;
+            if (tamanhoPagina <= 0) tamanhoPagina = 12;
+
+            return await _context.Filmes
+                .AsNoTracking()
+                .OrderBy(f => f.Titulo)
+                .Skip((pagina - 1) * tamanhoPagina)
+                .Take(tamanhoPagina)
+                .ToListAsync();
+        }
     }
 }

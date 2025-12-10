@@ -23,5 +23,8 @@ namespace catalogo_filmes_previsao_tempo.Data
 
         // GET BY ID 
         Task<Filme?> GetByIdAsync(int id);
+        
+        Task<int> CountAsync();
+        Task<List<Filme>> ListPagedAsync(int pagina, int tamanhoPagina);
     }
 }
