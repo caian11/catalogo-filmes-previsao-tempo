@@ -47,7 +47,7 @@ public class TmdbApiService : ITmdbApiService
                 cacheKey,
                 result,
                 new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5)) // TTL 5 min
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5)) 
             );
 
             return result;
@@ -80,7 +80,7 @@ public class TmdbApiService : ITmdbApiService
                 cacheKey,
                 movie,
                 new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)) // TTL 10 min
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)) 
             );
 
             return movie;
@@ -94,7 +94,6 @@ public class TmdbApiService : ITmdbApiService
 
     public async Task<ImagesWithId> GetMovieImagesAsync(int tmdbId)
     {
-        // Se quiser cachear imagens também, pode reaproveitar o TTL de detalhes ou outro:
         var cacheKey = $"Tmdb:MovieImages:{tmdbId}";
 
         if (_cache.TryGetValue<ImagesWithId>(cacheKey, out var cachedImages))
@@ -128,8 +127,7 @@ public class TmdbApiService : ITmdbApiService
         try
         {
             var config = await _client.GetConfigAsync();
-
-            // Config quase não muda, pode ser um TTL bem alto
+            
             _cache.Set(
                 ConfigCacheKey,
                 config,
