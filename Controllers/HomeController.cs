@@ -9,23 +9,34 @@ namespace catalogo_filmes_previsao_tempo.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly AppDbContext _context;
+    private readonly IFilmeRepository _filmes;
 
-    public HomeController(ILogger<HomeController> logger, AppDbContext context)
+    public HomeController(
+        ILogger<HomeController> logger,
+        IFilmeRepository filmes   // injeta o repositório aqui
+    )
     {
         _logger = logger;
-        _context = context;
+        _filmes = filmes;
     }
 
-    public async Task<IActionResult> Index()
+    // GET /
+    public async Task<IActionResult> Index(int pagina = 1, int tamanhoPagina = 12)
     {
-        // últimos 12 filmes cadastrados
-        var filmes = await _context.Filmes
-            .OrderByDescending(f => f.DataCriacao)
-            .Take(12)
-            .ToListAsync();
+        if (pagina < 1) pagina = 1;
 
-        return View(filmes);
+        var totalRegistros = await _filmes.CountAsync();
+        var filmes = await _filmes.ListPagedAsync(pagina, tamanhoPagina);
+
+        var vm = new FilmeCatalogoViewModel
+        {
+            Filmes = filmes,
+            PaginaAtual = pagina,
+            TamanhoPagina = tamanhoPagina,
+            TotalRegistros = totalRegistros
+        };
+
+        return View(vm);
     }
 
     public IActionResult Privacy()
