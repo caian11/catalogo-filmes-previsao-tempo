@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using catalogo_filmes_previsao_tempo.Validators;
+
 namespace catalogo_filmes_previsao_tempo.Models;
 
 public class Filme
@@ -15,7 +18,10 @@ public class Filme
     public decimal? NotaMedia { get; set; }
     public string? ElencoPrincipal { get; set; }
     public string? CidadeReferencia { get; set; }
+    [CustomValidation(typeof(LatitudeLongitudeValidator), nameof(LatitudeLongitudeValidator.ValidateLatitude))]
     public double? Latitude { get; set; }
+
+    [CustomValidation(typeof(LatitudeLongitudeValidator), nameof(LatitudeLongitudeValidator.ValidateLongitude))]
     public double? Longitude { get; set; }
     public DateTimeOffset DataCriacao { get; set; }
     public DateTimeOffset DataAtualizacao { get; set; }
