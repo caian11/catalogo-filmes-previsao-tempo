@@ -97,8 +97,12 @@
 
                         <div class="col-12 col-md-4">
                             <label asp-for="NotaMedia" class="form-label small"></label>
-                            <input asp-for="NotaMedia" class="form-control form-control-sm" />
+                            <input asp-for="NotaMedia"
+                                   type="text"
+                                   class="form-control form-control-sm" />
+                            <span asp-validation-for="NotaMedia" class="text-danger small"></span>
                         </div>
+
 
                         <div class="col-12 col-md-6">
                             <label asp-for="Genero" class="form-label small"></label>
@@ -164,5 +168,10 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+    jQuery.validator.methods.number = function (value, element) {
+        return this.optional(element) || true;
+    };
+    </script>
 }
