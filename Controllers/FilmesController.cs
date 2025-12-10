@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using catalogo_filmes_previsao_tempo.Data;
 using catalogo_filmes_previsao_tempo.Services;
 using catalogo_filmes_previsao_tempo.Models;
@@ -16,12 +17,16 @@ namespace catalogo_filmes_previsao_tempo.Controllers
     {
         private readonly IFilmeRepository _filmes;
         private readonly IWeatherApiService _weather;
+        private readonly ILogger<FilmesController> _logger;
 
-
-        public FilmesController(IFilmeRepository filmes, IWeatherApiService weather)
+        public FilmesController(
+            IFilmeRepository filmes,
+            IWeatherApiService weather,
+            ILogger<FilmesController> logger)
         {
             _filmes = filmes;
             _weather = weather;
+            _logger = logger;
         }
 
         // GET /Filmes
@@ -46,8 +51,6 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         private FileResult ExportarCsv(IEnumerable<Filme> filmes)
         {
             var sb = new StringBuilder();
-
-            // cabeçalho
             sb.AppendLine("Id;Titulo;Genero;DataLancamento;CidadeReferencia");
 
             foreach (var f in filmes)
@@ -55,13 +58,9 @@ namespace catalogo_filmes_previsao_tempo.Controllers
                 var titulo = (f.Titulo ?? "").Replace("\"", "\"\"");
                 var genero = (f.Genero ?? "").Replace("\"", "\"\"");
                 var cidade = (f.CidadeReferencia ?? "").Replace("\"", "\"\"");
-                var dataLanc = f.DataLancamento.HasValue
-                    ? f.DataLancamento.Value.ToString("yyyy-MM-dd")
-                    : "";
+                var dataLanc = f.DataLancamento?.ToString("yyyy-MM-dd") ?? "";
 
-                sb.AppendLine(
-                    $"{f.Id};\"{titulo}\";\"{genero}\";\"{dataLanc}\";\"{cidade}\""
-                );
+                sb.AppendLine($"{f.Id};\"{titulo}\";\"{genero}\";\"{dataLanc}\";\"{cidade}\"");
             }
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
@@ -75,7 +74,6 @@ namespace catalogo_filmes_previsao_tempo.Controllers
             using var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add("Filmes");
 
-            // cabeçalho
             ws.Cell(1, 1).Value = "Id";
             ws.Cell(1, 2).Value = "Título";
             ws.Cell(1, 3).Value = "Gênero";
@@ -111,7 +109,12 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var filme = await _filmes.GetByIdAsync(id);
-            if (filme == null) return NotFound();
+
+            if (filme == null)
+            {
+                _logger.LogWarning("Filme não encontrado. Id={Id}", id);
+                return NotFound();
+            }
 
             WeatherForecastDto? weather = null;
             string? weatherError = null;
@@ -127,12 +130,20 @@ namespace catalogo_filmes_previsao_tempo.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex,
+                        "Erro ao obter previsão do tempo para FilmeId={Id} (Lat={Lat}, Lng={Lng})",
+                        filme.Id, filme.Latitude, filme.Longitude);
+
                     weatherError = "Não foi possível obter a previsão do tempo.";
                 }
             }
             else
             {
-                weatherError = "Latitude/Longitude não informadas. Edite o filme para adicionar.";
+                _logger.LogWarning(
+                    "Filme sem coordenadas. FilmeId={Id}. Não será possível buscar clima.",
+                    filme.Id);
+
+                weatherError = "Latitude/Longitude não informadas.";
             }
 
             var vm = new MovieDetailsWithWeatherViewModel
@@ -157,7 +168,12 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var filme = await _filmes.GetByIdAsync(id);
-            if (filme == null) return NotFound();
+
+            if (filme == null)
+            {
+                _logger.LogWarning("Tentativa de editar filme inexistente. Id={Id}", id);
+                return NotFound();
+            }
 
             return View(filme);
         }
@@ -167,13 +183,36 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Filme filme)
         {
-            if (id != filme.Id) return BadRequest();
+            if (id != filme.Id)
+            {
+                _logger.LogError(
+                    "Id mismatch na edição. RouteId={RouteId}, ModelId={ModelId}",
+                    id, filme.Id);
+
+                return BadRequest();
+            }
 
             if (!ModelState.IsValid)
-                return View(filme);
+            {
+                _logger.LogWarning(
+                    "ModelState inválido na edição do filme. Id={Id}", filme.Id);
 
-            filme.DataAtualizacao = DateTimeOffset.UtcNow;
-            await _filmes.UpdateAsync(filme);
+                return View(filme);
+            }
+
+            try
+            {
+                filme.DataAtualizacao = DateTimeOffset.UtcNow;
+                await _filmes.UpdateAsync(filme);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Erro ao atualizar filme no banco. Id={Id}", filme.Id);
+
+                ModelState.AddModelError("", "Erro ao salvar no banco.");
+                return View(filme);
+            }
 
             return RedirectToAction("Index", "Home");
         }
@@ -183,7 +222,18 @@ namespace catalogo_filmes_previsao_tempo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _filmes.DeleteAsync(id);
+            try
+            {
+                await _filmes.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Erro ao deletar filme. Id={Id}", id);
+
+                return BadRequest("Erro ao excluir.");
+            }
+
             return RedirectToAction("Index", "Home");
         }
     }

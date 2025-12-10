@@ -10,30 +10,70 @@ namespace catalogo_filmes_previsao_tempo.Services;
 public class TmdbApiService : ITmdbApiService
 {
     private readonly TMDbClient _client;
+    private readonly ILogger<TmdbApiService> _logger;
 
-    public TmdbApiService(IConfiguration configuration)
+    public TmdbApiService(IConfiguration configuration, ILogger<TmdbApiService> logger)
     {
         var apiKey = configuration["TMDb:ApiKey"];
         _client = new TMDbClient(apiKey);
+        _logger = logger;
+        _logger.LogInformation("TMDbApiService inicializado");
     }
 
-    public Task<SearchContainer<SearchMovie>> SearchMoviesAsync(string query, int page = 1)
+    public async Task<SearchContainer<SearchMovie>> SearchMoviesAsync(string query, int page = 1)
     {
-        return _client.SearchMovieAsync(query, page: page);
+        try
+        {
+          return await _client.SearchMovieAsync(query, page: page);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar filmes no TMDb. Query='{query}'", query);
+            throw;
+        }
     }
 
-    public Task<Movie> GetMovieDetailsAsync(int tmdbId)
+    public async Task<Movie> GetMovieDetailsAsync(int tmdbId)
     {
-        return _client.GetMovieAsync(tmdbId, MovieMethods.Credits | MovieMethods.Images);
+        try
+        {
+            var movie = await _client.GetMovieAsync(tmdbId, MovieMethods.Credits | MovieMethods.Images);
+
+            if (movie == null) _logger.LogWarning("TMDb não encontrou detalhes para o ID={tmdbId}", tmdbId);
+
+            return movie;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar detalhes do filme. ID={tmdbId}", tmdbId);
+            throw;
+        }
     }
 
-    public Task<ImagesWithId> GetMovieImagesAsync(int tmdbId)
+    public async Task<ImagesWithId> GetMovieImagesAsync(int tmdbId)
     {
-        return _client.GetMovieImagesAsync(tmdbId);
+        try
+        {
+            return await _client.GetMovieImagesAsync(tmdbId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar imagens do filme. ID={tmdbId}", tmdbId);
+            throw;
+        }
     }
 
-    public Task<TMDbConfig> GetConfigurationAsync()
+    public async Task<TMDbConfig> GetConfigurationAsync()
     {
-        return _client.GetConfigAsync();
+
+        try
+        {
+            return await _client.GetConfigAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao carregar configurações do TMDb");
+            throw;
+        }
     }
 }
