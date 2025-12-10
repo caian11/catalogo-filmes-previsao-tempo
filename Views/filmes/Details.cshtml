@@ -5,7 +5,7 @@
     var posterUrl = !string.IsNullOrEmpty(Model.Filme.PosterPath)
         ? "https://image.tmdb.org/t/p/w342" + Model.Filme.PosterPath
         : null;
-}   
+}
 
 <div class="mb-3">
     <a asp-controller="Home"
@@ -15,8 +15,9 @@
     </a>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm mb-4">
     <div class="row g-0">
+
         @if (!string.IsNullOrEmpty(posterUrl))
         {
             <div class="col-md-4">
@@ -34,9 +35,7 @@
                 @* Campos do filme *@
                 @if (!string.IsNullOrEmpty(Model.Filme.TituloOriginal))
                 {
-                    <p class="text-muted mb-1">
-                        <small>Título original: @Model.Filme.TituloOriginal</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Título original: @Model.Filme.TituloOriginal</small></p>
                 }
 
                 @if (Model.Filme.DataLancamento.HasValue)
@@ -48,87 +47,46 @@
 
                 @if (!string.IsNullOrEmpty(Model.Filme.Genero))
                 {
-                    <p class="text-muted mb-1">
-                        <small>Gênero: @Model.Filme.Genero</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Gênero: @Model.Filme.Genero</small></p>
                 }
 
                 @if (!string.IsNullOrEmpty(Model.Filme.Lingua))
                 {
-                    <p class="text-muted mb-1">
-                        <small>Língua original: @Model.Filme.Lingua</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Língua original: @Model.Filme.Lingua</small></p>
                 }
 
                 @if (Model.Filme.Duracao.HasValue)
                 {
-                    <p class="text-muted mb-1">
-                        <small>Duração: @Model.Filme.Duracao min</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Duração: @Model.Filme.Duracao min</small></p>
                 }
 
                 @if (Model.Filme.NotaMedia.HasValue)
                 {
-                    <p class="text-muted mb-1">
-                        <small>Nota média: @Model.Filme.NotaMedia</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Nota média: @Model.Filme.NotaMedia</small></p>
                 }
 
                 @if (!string.IsNullOrEmpty(Model.Filme.CidadeReferencia))
                 {
-                    <p class="text-muted mb-1">
-                        <small>Cidade de referência: @Model.Filme.CidadeReferencia</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Cidade de referência: @Model.Filme.CidadeReferencia</small></p>
                 }
 
                 @if (Model.Filme.Latitude.HasValue && Model.Filme.Longitude.HasValue)
                 {
-                    <p class="text-muted mb-1">
-                        <small>Coordenadas: @Model.Filme.Latitude, @Model.Filme.Longitude</small>
-                    </p>
+                    <p class="text-muted mb-1"><small>Coordenadas: @Model.Filme.Latitude, @Model.Filme.Longitude</small></p>
                 }
 
                 @if (!string.IsNullOrEmpty(Model.Filme.ElencoPrincipal))
                 {
-                    <p class="mt-3">
-                        <strong>Elenco principal:</strong><br />
-                        @Model.Filme.ElencoPrincipal
-                    </p>
+                    <p class="mt-3"><strong>Elenco principal:</strong><br />@Model.Filme.ElencoPrincipal</p>
                 }
 
                 @if (!string.IsNullOrEmpty(Model.Filme.Sinopse))
                 {
-                    <p class="mt-3">
-                        <strong>Sinopse:</strong><br />
-                        @Model.Filme.Sinopse
-                    </p>
-                }
-
-                <hr />
-
-                <h5>🌦️ Previsão do Tempo</h5>
-
-                @if (!string.IsNullOrEmpty(Model.WeatherError))
-                {
-                    <div class="alert alert-warning">
-                        @Model.WeatherError
-                    </div>
-                }
-                else if (Model.Weather != null)
-                {
-                    <div class="alert alert-info">
-                        <p><strong>Máxima:</strong> @Model.Weather.MaxTemperature°C</p>
-                        <p><strong>Mínima:</strong> @Model.Weather.MinTemperature°C</p>
-                        <p><strong>Data:</strong> @Model.Weather.Date</p>
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted">Nenhuma informação de clima disponível.</p>
+                    <p class="mt-3"><strong>Sinopse:</strong><br />@Model.Filme.Sinopse</p>
                 }
 
                 @* Botões *@
-                <div class="mt-3 d-flex gap-2">
+                <div class="mt-4 d-flex gap-2">
                     <a asp-controller="Filmes"
                        asp-action="Edit"
                        asp-route-id="@Model.Filme.Id"
@@ -151,6 +109,39 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+@* CARD SEPARADO PARA O CLIMA *@
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <h5 class="card-title">☁️ Clima da cidade do filme</h5>
+        <hr />
+
+        @if (!string.IsNullOrEmpty(Model.WeatherError))
+        {
+            <div class="alert alert-warning mb-0">
+                @Model.WeatherError
+            </div>
+        }
+        else if (Model.Weather != null)
+        {
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <p><strong>Máxima:</strong><br />@Model.Weather.MaxTemperature°C</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Mínima:</strong><br />@Model.Weather.MinTemperature°C</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Data:</strong><br />@Model.Weather.Date</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted m-0">Nenhuma informação climática disponível.</p>
+        }
     </div>
 </div>
 

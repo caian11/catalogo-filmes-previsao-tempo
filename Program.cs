@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddFile("logs/app.log");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

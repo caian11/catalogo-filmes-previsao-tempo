@@ -11,6 +11,9 @@ dotnet add package TMDbLib
 ```bash
 dotnet add package ClosedXML
 ```
+```bash
+dotnet add package Serilog.Extensions.Logging.File
+```
 
 ---
 
